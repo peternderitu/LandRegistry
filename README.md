@@ -26,4 +26,4 @@ Have the ability to obtain a signed deed
 Ability to add validators and remove them.
 
 FlowChart:https://github.com/peternderitu/LandRegistry/blob/master/Flowchart.jpg
-Project Requirement Document:
+Project Requirement Document:https://github.com/peternderitu/LandRegistry/blob/master/Land%20property%20smart%20contract.docx

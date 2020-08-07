@@ -24,3 +24,5 @@ Have a way to map properties to the owners
 Have the ability to pay any fees required
 Have the ability to obtain a signed deed
 Ability to add validators and remove them.
+
+FlowChart(https://github.com/peternderitu/LandRegistry/blob/master/Flowchart.jpg)

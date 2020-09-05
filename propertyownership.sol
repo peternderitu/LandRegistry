@@ -9,10 +9,15 @@ contract PropertyOwnership is LandReg, ERC721 {
     
     mapping (uint => address) propertyApprovals;
     
+    
     modifier onlyOwnerOf(uint _propertyId) {
     require(msg.sender == propertyToHolder[_propertyId]);
     _;
   }
+    modifier onlyValidator(address addr) {
+        require (msg.sender == validatorDetails[addr].addr);
+        _;
+    }
     function _owns(address _claimingaddr, uint _tokenId) internal view returns(bool) {
         return propertyToHolder[_tokenId] == _claimingaddr;
     }
@@ -38,7 +43,7 @@ contract PropertyOwnership is LandReg, ERC721 {
       _transfer(_from, _to, _tokenId);
     }
 
-    function approve(address _approved, uint256 _tokenId) public override onlyOwnerOf(_tokenId) {
+    function approve(address _approved, uint256 _tokenId) public override onlyOwnerOf(_tokenId) onlyValidator(msg.sender) {
       propertyApprovals[_tokenId] = _approved;
       emit Approval(msg.sender, _approved, _tokenId);
     }

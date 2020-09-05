@@ -26,10 +26,7 @@ contract PropertyTransactions is PropertyOwnership {
     mapping(uint => rentedProperty) public propertyAvailableToLease;
     mapping (uint => uint) propertyIdToValue;
     
-    modifier onlyValidator(address addr) {
-        require (msg.sender == validatorDetails[addr].addr);
-        _;
-    }
+    
   
   
    function enablePropertyForLeasing(uint _propertyId, uint _leasePeriodinseconds, uint _leaseFee) public onlyOwner returns(bool) {

@@ -9,14 +9,16 @@ contract LandReg is Ownable {
         string location;
         string holder_name;
         string lr_no;
+        uint holder_id;
     }
      //struct that holds property owner details which i call holder
     struct holder {
         string name;
         string contact;
         string tax_pin;
-        uint id;
+        uint id_no;
         address _address;
+        bool isExist;
     }
     //struct that holds validator details, they are responsible for valuating property for tax purposes
     struct validator {
@@ -26,11 +28,19 @@ contract LandReg is Ownable {
         address addr;
         bool isExist;
     }
+    
+    address public ceoaddress;
+    
+    modifier onlyCEO() {
+        require(msg.sender == ceoaddress);
+        _;
+    }
  
     // array for storing properties
     property[] public properties;
-    // array for storing property owners
+    //array for storing holders
     holder[] public holders;
+    
  
     //event that listens to addition of a new property into the properties array
     event NewProperty(uint propertyId, string name, string location, string holder_name, string lr_no);
@@ -42,8 +52,15 @@ contract LandReg is Ownable {
     // a lookup of validatorDetails by their addresses
     mapping (address => validator) validatorDetails;
     
+    
+    
+    // function that registers holders
+    function regHolders(string memory name, string memory contact, string memory tax_pin, uint id_no) public {
+        require(holders[id_no].isExist == false, "holder already exists");
+        holders.push(holder(name,contact,tax_pin, id_no,msg.sender,true));
+    }
     // function that registers validators 
-    function regValidators(string memory name, string memory title, uint id_no, address addr) public {
+    function regValidators(string memory name, string memory title, uint id_no, address addr) public onlyCEO {
         
         // check if validator exist already
         require(validatorDetails[addr].isExist==false,"validator already registered");
@@ -56,9 +73,11 @@ contract LandReg is Ownable {
         return(validatorDetails[addr].name,validatorDetails[addr].title,validatorDetails[addr].id_no,validatorDetails[addr].addr);
     }
     //function that registers property by their owners
-    function regProperty(string memory name, string memory location, string memory holder_name, string memory lr_no) public onlyOwner() {
+    function regProperty(string memory name, string memory location, string memory holder_name, string memory lr_no, uint holder_id) public onlyOwner() {
+        //checks to see if owner is present in the holders array
+        require(holders[holder_id].isExist == true, "Please register as holder first");
         //push each property to the properties array
-        properties.push(property(name, location, holder_name, lr_no));
+        properties.push(property(name, location, holder_name, lr_no, holder_id));
         
         // get property id by array length
         uint id = properties.length - 1;
@@ -83,5 +102,6 @@ contract LandReg is Ownable {
         }
         return result;
     }
+
     
 }

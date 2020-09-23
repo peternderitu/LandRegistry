@@ -1,4 +1,3 @@
-pragma solidity ^0.6.0;
 
 import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol';
 
@@ -30,6 +29,7 @@ contract LandReg is Ownable {
     }
     
     address public ceoaddress;
+    address payable govtaddress;
     
     modifier onlyCEO() {
         require(msg.sender == ceoaddress);
@@ -51,6 +51,7 @@ contract LandReg is Ownable {
     mapping (uint => address) propertyToHolder;
     // a lookup of validatorDetails by their addresses
     mapping (address => validator) validatorDetails;
+    mapping (address => property) public publicProperty;
     
     
     
@@ -86,6 +87,10 @@ contract LandReg is Ownable {
         // add property count
         holderToPropertyCount[msg.sender] = holderToPropertyCount[msg.sender]++;
         emit NewProperty(id, name, location, holder_name, lr_no);
+        //sort the properties to obtain property owned by govt address and store them in publicProperty mapping
+        if(propertyToHolder[id] == govtaddress){
+            publicProperty[govtaddress] = property(name,location,holder_name,lr_no,holder_id);
+        }
     }
     
     // function that gets all properties by their owners address
@@ -102,6 +107,9 @@ contract LandReg is Ownable {
         }
         return result;
     }
-
-    
+    // fubnction to get all public properties from the publicProperty mapping
+     function getPublicProperty() public view returns (string memory,string memory,string memory, string memory,uint){
+        
+        return(publicProperty[govtaddress].name,publicProperty[govtaddress].location,publicProperty[govtaddress].holder_name,publicProperty[govtaddress].lr_no,publicProperty[govtaddress].holder_id);
+    }
 }

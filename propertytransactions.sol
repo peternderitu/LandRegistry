@@ -17,7 +17,9 @@ contract PropertyTransactions is PropertyOwnership {
         uint leaseFee;
     }
     // value of tax on property to be paid to the government
-    uint stampduty = 5 * value;
+    uint numerator = 5 * value;
+    uint denominator = 100;
+    uint stampduty = numerator /  denominator;
     
     //property value or cost of a property
     uint value;
@@ -90,6 +92,7 @@ contract PropertyTransactions is PropertyOwnership {
     
     function payTax() external payable onlyOwner {
         require(msg.value == stampduty);
+        govtaddress.transfer(msg.value);
     }
     
     function withdraw(uint _propertyId) external onlyOwner {
@@ -98,3 +101,4 @@ contract PropertyTransactions is PropertyOwnership {
         _owner.transfer(address(this).balance);
       }
 }
+

@@ -1,33 +1,38 @@
-pragma solidity^0.6.0;
+pragma solidity ^0.6.0;
 import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol';
 
+//SPDX-License-Identifier: UNLICENSED
 contract LandReg is Ownable {
-    //struct that holds property details
+    uint holdercount = 0;
+     //struct that holds property owner details which i call holder
+    struct holder {
+        string name;
+        string tax_pin;
+        string email;
+        uint id_no;
+        uint contact;
+        address _address;
+        bool isExist;
+    }
+   
+    //struct that holds validator details, they are responsible for valuating property for tax purposes
+    struct validator {
+        string name;
+        string title;
+        string email;
+        uint id_no;
+        address addr;
+        bool isExist;
+    }
+     //struct that holds property details
     struct property {
         string name;
         string location;
         string holder_name;
         string lr_no;
         uint holder_id;
+        address _addr;
     }
-     //struct that holds property owner details which i call holder
-    struct holder {
-        string name;
-        string contact;
-        string tax_pin;
-        uint id_no;
-        address _address;
-        bool isExist;
-    }
-    //struct that holds validator details, they are responsible for valuating property for tax purposes
-    struct validator {
-        string name;
-        string title;
-        uint id_no;
-        address addr;
-        bool isExist;
-    }
-    
     address public ceoaddress;
     address payable govtaddress;
     
@@ -48,48 +53,47 @@ contract LandReg is Ownable {
     // a lookup of how many properties a holder has
     mapping (address => uint) public holderToPropertyCount;
     // a lookup of property owners by their property id
-    mapping (uint => address) propertyToHolder;
+    mapping (uint => address) public propertyToHolder;
     // a lookup of validatorDetails by their addresses
     mapping (address => validator) validatorDetails;
     mapping (address => property) public publicProperty;
-    
+    mapping (address => holder) public holderdetails;
+  
     
     
     // function that registers holders
-    function regHolders(string memory name, string memory contact, string memory tax_pin, uint id_no) public {
-        require(holders[id_no].isExist == false, "holder already exists");
-        holders.push(holder(name,contact,tax_pin, id_no,msg.sender,true));
+    function regHolders(string memory name, string memory tax_pin, string memory email, uint id_no, uint contact) public {
+        holders.push(holder(name,tax_pin,email, id_no,contact,msg.sender,true));
+        holderdetails[msg.sender]=holder(name,tax_pin,email,id_no,contact,msg.sender,true);
     }
     // function that registers validators 
-    function regValidators(string memory name, string memory title, uint id_no, address addr) public onlyCEO {
+    function regValidators(string memory name, string memory title,string memory email, uint id_no) public onlyCEO {
         
         // check if validator exist already
-        require(validatorDetails[addr].isExist==false,"validator already registered");
-        validatorDetails[addr]=validator(name,title,id_no,addr,true);
+        validatorDetails[msg.sender]=validator(name,title,email,id_no,msg.sender,true);
     }
     
     // function that returns validator details by address
-     function getvalidatorDetails(address addr) public view returns (string memory,string memory,uint,address){
+     function getvalidatorDetails(address addr) public view returns (string memory,string memory,string memory,uint,address){
         
-        return(validatorDetails[addr].name,validatorDetails[addr].title,validatorDetails[addr].id_no,validatorDetails[addr].addr);
+        return(validatorDetails[addr].name,validatorDetails[addr].title, validatorDetails[addr].email,validatorDetails[addr].id_no,validatorDetails[addr].addr);
     }
     //function that registers property by their owners
     function regProperty(string memory name, string memory location, string memory holder_name, string memory lr_no, uint holder_id) public onlyOwner() {
-        //checks to see if owner is present in the holders array
-        require(holders[holder_id].isExist == true, "Please register as holder first");
+        require(holderdetails[msg.sender].isExist==true);
         //push each property to the properties array
-        properties.push(property(name, location, holder_name, lr_no, holder_id));
+        properties.push(property(name, location, holder_name, lr_no, holder_id, msg.sender));
         
         // get property id by array length
         uint id = properties.length - 1;
         propertyToHolder[id] = msg.sender;
-        
+         
         // add property count
-        holderToPropertyCount[msg.sender] = holderToPropertyCount[msg.sender]++;
+        holderToPropertyCount[msg.sender]++;
         emit NewProperty(id, name, location, holder_name, lr_no);
         //sort the properties to obtain property owned by govt address and store them in publicProperty mapping
         if(propertyToHolder[id] == govtaddress){
-            publicProperty[govtaddress] = property(name,location,holder_name,lr_no,holder_id);
+            publicProperty[govtaddress] = property(name,location,holder_name,lr_no,holder_id,msg.sender);
         }
     }
     

@@ -16,17 +16,14 @@ contract PropertyTransactions is PropertyOwnership {
         uint leasePeriodinseconds;
         uint leaseFee;
     }
-    // value of tax on property to be paid to the government
-    uint numerator = 5 * value;
-    uint denominator = 100;
-    uint stampduty = numerator /  denominator;
+    
     
     //property value or cost of a property
     uint value;
     
 
     mapping(uint => rentedProperty) public propertyAvailableToLease;
-    mapping (uint => uint) propertyIdToValue;
+    mapping (uint => uint) public propertyIdToValue;
     
     
   
@@ -34,11 +31,11 @@ contract PropertyTransactions is PropertyOwnership {
    function enablePropertyForLeasing(uint _propertyId, uint _leasePeriodinseconds, uint _leaseFee) public onlyOwner returns(bool) {
        require(_leasePeriodinseconds > 0, "Must have leasePeriod");
        require(_leaseFee > 0, "Must have leaseFee");
-       
+       require(_propertyId == ownerToToken[msg.sender]);
        propertyAvailableToLease[_propertyId] = rentedProperty({
            lessor: msg.sender,
            lessee: address(0x0),
-           tokenId: _propertyId,
+           tokenId: ownerToToken[msg.sender],
            isLeased: false,
            startLease: 0,
            endLease:0,
@@ -49,30 +46,30 @@ contract PropertyTransactions is PropertyOwnership {
        return true;
    }
     
-    function _valuateProperty(uint _propertyId, uint _value) onlyValidator(msg.sender) internal {
-        propertyIdToValue[_propertyId] = _value;
-        _value = value;
+    function _valuateProperty(address _owner, uint _propertyId, uint _value) onlyValidator(msg.sender) public returns(uint) {
+        _propertyId = ownerToToken[_owner];
+        propertyIdToValue[_propertyId]+=_value;
+        return(propertyIdToValue[_propertyId]);
     }
     
-    function leaseProperty(uint _propertyId) public payable returns(bool) {
+    function leaseProperty(uint _propertyId, address to) public payable returns(bool) {
+        ownerToToken[msg.sender]=_propertyId;
         rentedProperty storage rentP = propertyAvailableToLease[_propertyId];
         require(msg.value == rentP.leaseFee);
         require(rentP.isLeased != true);
-        require(rentP.lessee == address(0));
         
-        rentP.lessee = msg.sender;
+        rentP.lessee = to;
         rentP.isLeased = true;
         
         rentP.startLease = now;
         rentP.endLease = now + rentP.leasePeriodinseconds;
         
-        transferFrom(msg.sender, address(this), rentP.leaseFee);
-        transferFrom(rentP.lessor, msg.sender, _propertyId);
+        transferFrom(rentP.lessor, rentP.lessee, _propertyId);
         
         return true;
     }
-    function getRemainingTimeLeftForLease(uint _propertyId) public view returns(uint) {
-
+    function getRemainingTimeLeftForLease(uint _propertyId,address holder) public view returns(uint) {
+        require(ownerToToken[holder]==_propertyId);
         rentedProperty storage rentP = propertyAvailableToLease[_propertyId];
 
         if (block.timestamp <= rentP.startLease) return rentP.endLease - rentP.startLease;
@@ -81,7 +78,8 @@ contract PropertyTransactions is PropertyOwnership {
     
     // returns ownership of lease to lender
     function getBackProperty(uint _propertyId) public {
-        uint timeLeft = getRemainingTimeLeftForLease(_propertyId);
+        require(ownerToToken[msg.sender]==_propertyId);
+        uint timeLeft = getRemainingTimeLeftForLease(_propertyId,msg.sender);
         
         rentedProperty storage rentP = propertyAvailableToLease[_propertyId];
         require(msg.sender == rentP.lessor);
@@ -90,15 +88,19 @@ contract PropertyTransactions is PropertyOwnership {
         }
     }
     
-    function payTax() external payable onlyOwner {
+    function payTax(uint _propertyId) external payable  {
+        require(ownerToToken[msg.sender]==_propertyId);
+         // value of tax on property to be paid to the government
+        uint numerator = 5 * _valuateProperty(msg.sender,_propertyId,value);
+        uint denominator = 100;
+        uint stampduty = numerator /  denominator;
         require(msg.value == stampduty);
         govtaddress.transfer(msg.value);
     }
     
-    function withdraw(uint _propertyId) external onlyOwner {
-        rentedProperty storage rentP = propertyAvailableToLease[_propertyId];
+    function withdraw() external onlyOwner {
+        rentedProperty storage rentP = propertyAvailableToLease[ownerToToken[msg.sender]];
         address payable _owner = rentP.lessor;
         _owner.transfer(address(this).balance);
       }
 }
-

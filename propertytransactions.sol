@@ -28,13 +28,13 @@ contract PropertyTransactions is PropertyOwnership {
     
   
   
-   function enablePropertyForLeasing(uint _propertyId, uint _leasePeriodinseconds, uint _leaseFee) public onlyOwner returns(bool) {
+   function enablePropertyForLeasing(uint _propertyId, uint _leasePeriodinseconds, uint _leaseFee, address to) public onlyOwner returns(bool) {
        require(_leasePeriodinseconds > 0, "Must have leasePeriod");
        require(_leaseFee > 0, "Must have leaseFee");
        require(_propertyId == ownerToToken[msg.sender]);
        propertyAvailableToLease[_propertyId] = rentedProperty({
            lessor: msg.sender,
-           lessee: address(0x0),
+           lessee: to,
            tokenId: ownerToToken[msg.sender],
            isLeased: false,
            startLease: 0,
@@ -98,9 +98,5 @@ contract PropertyTransactions is PropertyOwnership {
         govtaddress.transfer(msg.value);
     }
     
-    function withdraw() external onlyOwner {
-        rentedProperty storage rentP = propertyAvailableToLease[ownerToToken[msg.sender]];
-        address payable _owner = rentP.lessor;
-        _owner.transfer(address(this).balance);
-      }
+   
 }

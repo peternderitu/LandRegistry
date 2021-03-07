@@ -1,5 +1,5 @@
 pragma solidity ^0.6.0;
-import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol';
+import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/solc-0.6/contracts/access/Ownable.sol';
 
 //SPDX-License-Identifier: UNLICENSED
 contract LandReg is Ownable {
@@ -30,6 +30,7 @@ contract LandReg is Ownable {
         string location;
         string holder_name;
         string lr_no;
+        string ipfsHash;
         uint holder_id;
         address _addr;
     }
@@ -48,7 +49,7 @@ contract LandReg is Ownable {
     
  
     //event that listens to addition of a new property into the properties array
-    event NewProperty(uint propertyId, string name, string location, string holder_name, string lr_no);
+    event NewProperty(uint propertyId, string name, string location, string holder_name, string lr_no, string ipfsHash);
     
     // a lookup of how many properties a holder has
     mapping (address => uint) public holderToPropertyCount;
@@ -79,10 +80,10 @@ contract LandReg is Ownable {
         return(validatorDetails[addr].name,validatorDetails[addr].title, validatorDetails[addr].email,validatorDetails[addr].id_no,validatorDetails[addr].addr);
     }
     //function that registers property by their owners
-    function regProperty(string memory name, string memory location, string memory holder_name, string memory lr_no, uint holder_id) public onlyOwner() {
+    function regProperty(string memory name, string memory location, string memory holder_name, string memory lr_no,string memory ipfsHash, uint holder_id) public onlyOwner() {
         require(holderdetails[msg.sender].isExist==true);
         //push each property to the properties array
-        properties.push(property(name, location, holder_name, lr_no, holder_id, msg.sender));
+        properties.push(property(name, location, holder_name, lr_no, ipfsHash, holder_id, msg.sender));
         
         // get property id by array length
         uint id = properties.length - 1;
@@ -90,10 +91,10 @@ contract LandReg is Ownable {
          
         // add property count
         holderToPropertyCount[msg.sender]++;
-        emit NewProperty(id, name, location, holder_name, lr_no);
+        emit NewProperty(id, name, location, holder_name, lr_no, ipfsHash);
         //sort the properties to obtain property owned by govt address and store them in publicProperty mapping
         if(propertyToHolder[id] == govtaddress){
-            publicProperty[govtaddress] = property(name,location,holder_name,lr_no,holder_id,msg.sender);
+            publicProperty[govtaddress] = property(name,location,holder_name,lr_no,ipfsHash,holder_id,msg.sender);
         }
     }
     
@@ -112,8 +113,8 @@ contract LandReg is Ownable {
         return result;
     }
     // fubnction to get all public properties from the publicProperty mapping
-     function getPublicProperty() public view returns (string memory,string memory,string memory, string memory,uint){
+     function getPublicProperty() public view returns (string memory,string memory,string memory, string memory,string memory,uint){
         
-        return(publicProperty[govtaddress].name,publicProperty[govtaddress].location,publicProperty[govtaddress].holder_name,publicProperty[govtaddress].lr_no,publicProperty[govtaddress].holder_id);
+        return(publicProperty[govtaddress].name,publicProperty[govtaddress].location,publicProperty[govtaddress].holder_name,publicProperty[govtaddress].lr_no,publicProperty[govtaddress].ipfsHash,publicProperty[govtaddress].holder_id);
     }
 }

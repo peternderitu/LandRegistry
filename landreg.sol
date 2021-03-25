@@ -1,4 +1,5 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/solc-0.6/contracts/access/Ownable.sol';
 
 //SPDX-License-Identifier: UNLICENSED
@@ -67,6 +68,12 @@ contract LandReg is Ownable {
         holders.push(holder(name,tax_pin,email, id_no,contact,msg.sender,true));
         holderdetails[msg.sender]=holder(name,tax_pin,email,id_no,contact,msg.sender,true);
     }
+
+    //function that returns holder details
+    function getHolders() public view returns (holder[] memory){
+        return holders;
+    }
+    
     // function that registers validators 
     function regValidators(string memory name, string memory title,string memory email, uint id_no) public onlyCEO {
         

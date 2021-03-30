@@ -1,15 +1,17 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
-import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/solc-0.6/contracts/access/Ownable.sol';
+import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v3.1.0/contracts/access/Ownable.sol';
 
 //SPDX-License-Identifier: UNLICENSED
 contract LandReg is Ownable {
     uint holdercount = 0;
+    enum State {ApprovedForTransaction, Sold, Leased}
      //struct that holds property owner details which i call holder
     struct holder {
         string name;
         string tax_pin;
         string email;
+        string imageHash;
         uint id_no;
         uint contact;
         address _address;
@@ -46,11 +48,15 @@ contract LandReg is Ownable {
     // array for storing properties
     property[] public properties;
     //array for storing holders
-    holder[] public holders;
+    holder [] public holders;
     
  
     //event that listens to addition of a new property into the properties array
     event NewProperty(uint propertyId, string name, string location, string holder_name, string lr_no, string ipfsHash);
+    event LogApprovedForTransaction(uint propertyId);
+    event LogSold(uint propertyId);
+    event LogLeased(uint propertyId);
+    
     
     // a lookup of how many properties a holder has
     mapping (address => uint) public holderToPropertyCount;
@@ -64,9 +70,9 @@ contract LandReg is Ownable {
     
     
     // function that registers holders
-    function regHolders(string memory name, string memory tax_pin, string memory email, uint id_no, uint contact) public {
-        holders.push(holder(name,tax_pin,email, id_no,contact,msg.sender,true));
-        holderdetails[msg.sender]=holder(name,tax_pin,email,id_no,contact,msg.sender,true);
+    function regHolders(string memory name, string memory tax_pin, string memory email,string memory imageHash, uint id_no, uint contact) public {
+        holders.push(holder(name,tax_pin,email,imageHash, id_no,contact,msg.sender,true));
+        holderdetails[msg.sender]=holder(name,tax_pin,email,imageHash, id_no,contact,msg.sender,true);
     }
 
     //function that returns holder details
@@ -104,6 +110,11 @@ contract LandReg is Ownable {
             publicProperty[govtaddress] = property(name,location,holder_name,lr_no,ipfsHash,holder_id,msg.sender);
         }
     }
+    //function that returns property details
+    function getProperties() public view returns (property[] memory){
+        return properties;
+    }
+    
     
     // function that gets all properties by their owners address
     function getPropertyByHolder(address _holder) external view returns(uint[] memory) {
@@ -124,4 +135,5 @@ contract LandReg is Ownable {
         
         return(publicProperty[govtaddress].name,publicProperty[govtaddress].location,publicProperty[govtaddress].holder_name,publicProperty[govtaddress].lr_no,publicProperty[govtaddress].ipfsHash,publicProperty[govtaddress].holder_id);
     }
+    
 }

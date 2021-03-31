@@ -1,8 +1,8 @@
 pragma solidity ^0.6.0;
-
+pragma experimental ABIEncoderV2;
 import './landreg.sol';
-import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol';
-
+import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v3.1.0/contracts/token/ERC721/ERC721.sol';
+//SPDX-License-Identifier: UNLICENSED
 contract PropertyOwnership is LandReg, ERC721 {
     
     constructor() ERC721("TitleDeed", "TD") public { }
@@ -22,6 +22,7 @@ contract PropertyOwnership is LandReg, ERC721 {
     function approveTokenization(address holder) internal onlyValidator(msg.sender) returns(uint){
         uint tokenid = properties.length -1;
         propertyApprovals[holder]+=tokenid;
+        emit LogApprovedForTransaction(tokenid);
         return propertyApprovals[holder];
     }
     function mintToken(address owner, uint token) internal {

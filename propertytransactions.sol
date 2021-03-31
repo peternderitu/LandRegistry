@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
-
+pragma experimental ABIEncoderV2;
 import './propertyownership.sol';
-
+//SPDX-License-Identifier: UNLICENSED
 contract PropertyTransactions is PropertyOwnership {
     // struct that contains properties that are to be leased or rented
     struct rentedProperty {
@@ -65,7 +65,7 @@ contract PropertyTransactions is PropertyOwnership {
         rentP.endLease = now + rentP.leasePeriodinseconds;
         
         transferFrom(rentP.lessor, rentP.lessee, _propertyId);
-        
+        emit LogLeased(_propertyId);
         return true;
     }
     function getRemainingTimeLeftForLease(uint _propertyId,address holder) public view returns(uint) {

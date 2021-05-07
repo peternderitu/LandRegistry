@@ -34,6 +34,7 @@ contract LandReg is Ownable {
         string holder_name;
         string lr_no;
         string ipfsHash;
+        string landimgipfshash;
         uint holder_id;
         address _addr;
     }
@@ -52,7 +53,7 @@ contract LandReg is Ownable {
     
  
     //event that listens to addition of a new property into the properties array
-    event NewProperty(uint propertyId, string name, string location, string holder_name, string lr_no, string ipfsHash);
+    event NewProperty(uint propertyId, string name, string location, string holder_name, string lr_no, string ipfsHash, string landimgipfshash);
     event LogApprovedForTransaction(uint propertyId);
     event LogSold(uint propertyId);
     event LogLeased(uint propertyId);
@@ -93,10 +94,10 @@ contract LandReg is Ownable {
         return(validatorDetails[addr].name,validatorDetails[addr].title, validatorDetails[addr].email,validatorDetails[addr].id_no,validatorDetails[addr].addr);
     }
     //function that registers property by their owners
-    function regProperty(string memory name, string memory location, string memory holder_name, string memory lr_no,string memory ipfsHash, uint holder_id) public onlyOwner() {
+    function regProperty(string memory name, string memory location, string memory holder_name, string memory lr_no,string memory ipfsHash, string memory landimgipfshash, uint holder_id) public onlyOwner() {
         require(holderdetails[msg.sender].isExist==true);
         //push each property to the properties array
-        properties.push(property(name, location, holder_name, lr_no, ipfsHash, holder_id, msg.sender));
+        properties.push(property(name, location, holder_name, lr_no, ipfsHash,landimgipfshash, holder_id, msg.sender));
         
         // get property id by array length
         uint id = properties.length - 1;
@@ -104,10 +105,10 @@ contract LandReg is Ownable {
          
         // add property count
         holderToPropertyCount[msg.sender]++;
-        emit NewProperty(id, name, location, holder_name, lr_no, ipfsHash);
+        emit NewProperty(id, name, location, holder_name, lr_no, ipfsHash, landimgipfshash);
         //sort the properties to obtain property owned by govt address and store them in publicProperty mapping
         if(propertyToHolder[id] == govtaddress){
-            publicProperty[govtaddress] = property(name,location,holder_name,lr_no,ipfsHash,holder_id,msg.sender);
+            publicProperty[govtaddress] = property(name,location,holder_name,lr_no,ipfsHash,landimgipfshash, holder_id,msg.sender);
         }
     }
     //function that returns property details

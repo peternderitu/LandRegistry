@@ -94,7 +94,7 @@ contract LandReg is Ownable {
         return(validatorDetails[addr].name,validatorDetails[addr].title, validatorDetails[addr].email,validatorDetails[addr].id_no,validatorDetails[addr].addr);
     }
     //function that registers property by their owners
-    function regProperty(string memory name, string memory location, string memory holder_name, string memory lr_no,string memory ipfsHash, string memory landimgipfshash, uint holder_id) public onlyOwner() {
+    function regProperty(string memory name, string memory location, string memory holder_name, string memory lr_no,string memory ipfsHash, string memory landimgipfshash, uint holder_id) public {
         require(holderdetails[msg.sender].isExist==true);
         //push each property to the properties array
         properties.push(property(name, location, holder_name, lr_no, ipfsHash,landimgipfshash, holder_id, msg.sender));

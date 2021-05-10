@@ -38,13 +38,9 @@ contract LandReg is Ownable {
         uint holder_id;
         address _addr;
     }
-    address public ceoaddress;
+   
     address payable govtaddress;
     
-    modifier onlyCEO() {
-        require(msg.sender == ceoaddress);
-        _;
-    }
  
     // array for storing properties
     property[] public properties;
@@ -82,10 +78,10 @@ contract LandReg is Ownable {
     }
     
     // function that registers validators 
-    function regValidators(string memory name, string memory title,string memory email, uint id_no) public onlyCEO {
+    function regValidators(string memory name, string memory title,string memory email, uint id_no, address addr) public onlyOwner {
         
         // check if validator exist already
-        validatorDetails[msg.sender]=validator(name,title,email,id_no,msg.sender,true);
+        validatorDetails[addr]=validator(name,title,email,id_no,addr,true);
     }
     
     // function that returns validator details by address

@@ -5,7 +5,7 @@ import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v3.1
 //SPDX-License-Identifier: UNLICENSED
 contract LandReg is Ownable {
     uint holdercount = 0;
-    enum State {ApprovedForTransaction, Sold, Leased}
+    enum State {Pending, ApprovedForTransaction, Sold, Leased}
      //struct that holds property owner details which i call holder
     struct holder {
         string name;
@@ -37,6 +37,7 @@ contract LandReg is Ownable {
         string landimgipfshash;
         uint holder_id;
         address _addr;
+        State propertystate;
     }
    
     address payable govtaddress;
@@ -93,7 +94,8 @@ contract LandReg is Ownable {
     function regProperty(string memory name, string memory location, string memory holder_name, string memory lr_no,string memory ipfsHash, string memory landimgipfshash, uint holder_id) public {
         require(holderdetails[msg.sender].isExist==true);
         //push each property to the properties array
-        properties.push(property(name, location, holder_name, lr_no, ipfsHash,landimgipfshash, holder_id, msg.sender));
+        State pd = State.Pending;
+        properties.push(property(name, location, holder_name, lr_no, ipfsHash,landimgipfshash, holder_id, msg.sender,pd));
         
         // get property id by array length
         uint id = properties.length - 1;
@@ -104,7 +106,7 @@ contract LandReg is Ownable {
         emit NewProperty(id, name, location, holder_name, lr_no, ipfsHash, landimgipfshash);
         //sort the properties to obtain property owned by govt address and store them in publicProperty mapping
         if(propertyToHolder[id] == govtaddress){
-            publicProperty[govtaddress] = property(name,location,holder_name,lr_no,ipfsHash,landimgipfshash, holder_id,msg.sender);
+            publicProperty[govtaddress] = property(name,location,holder_name,lr_no,ipfsHash,landimgipfshash, holder_id,msg.sender, pd);
         }
     }
     //function that returns property details

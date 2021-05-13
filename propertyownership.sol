@@ -19,9 +19,10 @@ contract PropertyOwnership is LandReg, ERC721 {
         require (msg.sender == validatorDetails[addr].addr);
         _;
     }
-    function approveTokenization(address holder) internal onlyValidator(msg.sender) returns(uint){
+    function approveTokenization(address holder) public onlyValidator(msg.sender) returns(uint){
         uint tokenid = properties.length -1;
         propertyApprovals[holder]+=tokenid;
+        properties[tokenid].propertystate = State.ApprovedForTransaction;
         emit LogApprovedForTransaction(tokenid);
         return propertyApprovals[holder];
     }

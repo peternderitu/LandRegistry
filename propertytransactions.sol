@@ -24,6 +24,7 @@ contract PropertyTransactions is PropertyOwnership {
 
     mapping(uint => rentedProperty) public propertyAvailableToLease;
     mapping (uint => uint) public propertyIdToValue;
+    mapping(address => uint) public tokenAvailableForSale;
     
     
   
@@ -66,6 +67,7 @@ contract PropertyTransactions is PropertyOwnership {
         
         transferFrom(rentP.lessor, rentP.lessee, _propertyId);
         emit LogLeased(_propertyId);
+        properties[_propertyId].propertystate = State.Leased;
         return true;
     }
     function getRemainingTimeLeftForLease(uint _propertyId,address holder) public view returns(uint) {
@@ -86,6 +88,20 @@ contract PropertyTransactions is PropertyOwnership {
         if (timeLeft == 0) {
             transferFrom(rentP.lessee, rentP.lessor, _propertyId);
         }
+    }
+    function sellProperty(uint _propertyId) public onlyOwnerOf(_propertyId) returns(bool) {
+        tokenAvailableForSale[msg.sender]+=_propertyId;
+        return true;
+    }
+    
+    function buyProperty(uint _propertyId, address from) public payable {
+        ownerToToken[msg.sender] = _propertyId;
+        require(properties[_propertyId].propertystate == State.ApprovedForTransaction);
+        require(msg.value == propertyIdToValue[_propertyId]);
+        require(sellProperty(_propertyId)==true);
+        transferFrom(from, msg.sender, _propertyId);
+        properties[_propertyId].propertystate = State.Sold;
+        emit LogSold(_propertyId);
     }
     
     function payTax(uint _propertyId) external payable  {

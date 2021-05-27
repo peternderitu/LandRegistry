@@ -29,13 +29,13 @@ contract PropertyTransactions is PropertyOwnership {
     
   
   
-   function enablePropertyForLeasing(uint _propertyId, uint _leasePeriodinseconds, uint _leaseFee, address to) public onlyOwnerOf(_propertyId) returns(bool) {
+   function enablePropertyForLeasing(uint _propertyId, uint _leasePeriodinseconds, uint _leaseFee) public onlyOwnerOf(_propertyId) returns(bool) {
        require(_leasePeriodinseconds > 0, "Must have leasePeriod");
        require(_leaseFee > 0, "Must have leaseFee");
        require(_propertyId == ownerToToken[msg.sender]);
        propertyAvailableToLease[_propertyId] = rentedProperty({
            lessor: msg.sender,
-           lessee: to,
+           lessee: address(0),
            tokenId: ownerToToken[msg.sender],
            isLeased: false,
            startLease: 0,
